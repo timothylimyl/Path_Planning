@@ -13,7 +13,7 @@ The highway's waypoints loop around so the frenet s value, distance along the ro
 
 Here is the data provided from the Simulator to the C++ Program
 
-### Main car's localization Data (No Noise)
+#### Main car's localization Data (No Noise)
 
 ["x"] The car's x position in map coordinates
 
@@ -27,7 +27,7 @@ Here is the data provided from the Simulator to the C++ Program
 
 ["speed"] The car's speed in MPH
 
-### Previous path data given to the Planner
+#### Previous path data given to the Planner
 
 //Note: Return the previous list but with processed points removed, can be a nice tool to show how far along
 the path has processed since last time. 
@@ -36,17 +36,19 @@ the path has processed since last time.
 
 ["previous_path_y"] The previous list of y points previously given to the simulator
 
-### Previous path's end s and d values 
+#### Previous path's end s and d values 
 
 ["end_path_s"] The previous list's last point's frenet s value
 
 ["end_path_d"] The previous list's last point's frenet d value
 
-### Sensor Fusion Data, a list of all other car's attributes on the same side of the road. (No Noise)
+#### Sensor Fusion Data, a list of all other car's attributes on the same side of the road. (No Noise)
 
 ["sensor_fusion"] A 2d vector of cars and then that car's [car's unique ID, car's x position in map coordinates, car's y position in map coordinates, car's x velocity in m/s, car's y velocity in m/s, car's s position in frenet coordinates, car's d position in frenet coordinates. 
 
 ---
+
+
 ## Logic for path planning (based on data provided)
 
 The vital information regarding other cars is the position of the cars in terms of the frenet coordinates. The car's s position tells us how close is the car to us along the lanes, the car's d position tells us which lane is the car in.
@@ -134,6 +136,6 @@ if(lane_not_clear) {  // Within the scanning range, check for cars, if there is 
 
 
 
-# Try it for yourself:
+## Try it for yourself:
 
 Go to the main repo from Udacity at [*HERE*](https://github.com/udacity/CarND-Path-Planning-Project). All of the set up information is provided for you. Message me over at [LinkedIn](https://www.linkedin.com/in/timothylimyonglee/) if you want to discuss more about the project.
