@@ -1,28 +1,15 @@
-# CarND-Path-Planning-Project
-Self-Driving Car Engineer Nanodegree Program
-   
-### Simulator.
-You can download the Term3 Simulator which contains the Path Planning Project from the [releases tab (https://github.com/udacity/self-driving-car-sim/releases/tag/T3_v1.2).  
+# Path Planning Project
+---
 
-To run the simulator on Mac/Linux, first make the binary file executable with the following command:
-```shell
-sudo chmod u+x {simulator_file_name}
-```
+## Goals
 
-### Goals
-In this project your goal is to safely navigate around a virtual highway with other traffic that is driving +-10 MPH of the 50 MPH speed limit. You will be provided the car's localization and sensor fusion data, there is also a sparse map list of waypoints around the highway. The car should try to go as close as possible to the 50 MPH speed limit, which means passing slower traffic when possible, note that other cars will try to change lanes too. The car should avoid hitting other cars at all cost as well as driving inside of the marked road lanes at all times, unless going from one lane to another. The car should be able to make one complete loop around the 6946m highway. Since the car is trying to go 50 MPH, it should take a little over 5 minutes to complete 1 loop. Also the car should not experience total acceleration over 10 m/s^2 and jerk that is greater than 10 m/s^3.
+In this project your goal is to safely navigate around a virtual highway with other traffic that is driving +-10 MPH of the 50 MPH speed limit. Car's localization and sensor fusion data are provided, there is also a sparse map list of waypoints around the highway. The car should try to go as close as possible to the 50 MPH speed limit, which means passing slower traffic when possible, note that other cars will try to change lanes too. The car should avoid hitting other cars at all cost as well as driving inside of the marked road lanes at all times, unless going from one lane to another. The car should be able to make one complete loop around the 6946m highway. Since the car is trying to go 50 MPH, it should take a little over 5 minutes to complete 1 loop. Also the car should not experience total acceleration over 10 m/s^2 and jerk that is greater than 10 m/s^3.
 
-#### The map of the highway is in data/highway_map.txt
+## Data provided
+
 Each waypoint in the list contains  [x,y,s,dx,dy] values. x and y are the waypoint's map coordinate position, the s value is the distance along the road to get to that waypoint in meters, the dx and dy values define the unit normal vector pointing outward of the highway loop.
 
 The highway's waypoints loop around so the frenet s value, distance along the road, goes from 0 to 6945.554.
-
-## Basic Build Instructions
-
-1. Clone this repo.
-2. Make a build directory: `mkdir build && cd build`
-3. Compile: `cmake .. && make`
-4. Run it: `./path_planning`.
 
 Here is the data provided from the Simulator to the C++ Program
 
@@ -59,87 +46,96 @@ the path has processed since last time.
 
 ["sensor_fusion"] A 2d vector of cars and then that car's [car's unique ID, car's x position in map coordinates, car's y position in map coordinates, car's x velocity in m/s, car's y velocity in m/s, car's s position in frenet coordinates, car's d position in frenet coordinates. 
 
-## Details
-
-1. The car uses a perfect controller and will visit every (x,y) point it recieves in the list every .02 seconds. The units for the (x,y) points are in meters and the spacing of the points determines the speed of the car. The vector going from a point to the next point in the list dictates the angle of the car. Acceleration both in the tangential and normal directions is measured along with the jerk, the rate of change of total Acceleration. The (x,y) point paths that the planner recieves should not have a total acceleration that goes over 10 m/s^2, also the jerk should not go over 50 m/s^3. (NOTE: As this is BETA, these requirements might change. Also currently jerk is over a .02 second interval, it would probably be better to average total acceleration over 1 second and measure jerk from that.
-
-2. There will be some latency between the simulator running and the path planner returning a path, with optimized code usually its not very long maybe just 1-3 time steps. During this delay the simulator will continue using points that it was last given, because of this its a good idea to store the last points you have used so you can have a smooth transition. previous_path_x, and previous_path_y can be helpful for this transition since they show the last points given to the simulator controller with the processed points already removed. You would either return a path that extends this previous path or make sure to create a new path that has a smooth transition with this last path.
-
-## Tips
-
-A really helpful resource for doing this project and creating smooth trajectories was using http://kluge.in-chemnitz.de/opensource/spline/, the spline function is in a single hearder file is really easy to use.
-
 ---
 
-## Dependencies
 
-* cmake >= 3.5
-  * All OSes: [click here for installation instructions](https://cmake.org/install/)
-* make >= 4.1
-  * Linux: make is installed by default on most Linux distros
-  * Mac: [install Xcode command line tools to get make](https://developer.apple.com/xcode/features/)
-  * Windows: [Click here for installation instructions](http://gnuwin32.sourceforge.net/packages/make.htm)
-* gcc/g++ >= 5.4
-  * Linux: gcc / g++ is installed by default on most Linux distros
-  * Mac: same deal as make - [install Xcode command line tools]((https://developer.apple.com/xcode/features/)
-  * Windows: recommend using [MinGW](http://www.mingw.org/)
-* [uWebSockets](https://github.com/uWebSockets/uWebSockets)
-  * Run either `install-mac.sh` or `install-ubuntu.sh`.
-  * If you install from source, checkout to commit `e94b6e1`, i.e.
-    ```
-    git clone https://github.com/uWebSockets/uWebSockets 
-    cd uWebSockets
-    git checkout e94b6e1
-    ```
+## Logic for path planning (based on data provided)
 
-## Editor Settings
+The vital information regarding other cars is the position of the cars in terms of the frenet coordinates. The car's s position tells us how close is the car to us along the lanes, the car's d position tells us which lane is the car in.
 
-We've purposefully kept editor configuration files out of this repo in order to
-keep it as simple and environment agnostic as possible. However, we recommend
-using the following settings:
+The logic for path planning is simple:
 
-* indent using spaces
-* set tab width to 2 spaces (keeps the matrices in source code aligned)
+1. Try to retain a speed close to sub 50 Mph at all times
+2. Slow down and prevent collision when a car is too close.
+3. When a car is too close, check whether the lane/lanes to the side of the current car lane is clear to switch lane
+4. If clear to switch lane, switch lanes.
 
-## Code Style
+Important ideas to keep in mind:
 
-Please (do your best to) stick to [Google's C++ style guide](https://google.github.io/styleguide/cppguide.html).
+- When increasing/decreasing speed, speed has to be changed slowily to prevent jerk.
+- We can use the `s` coordinate to determine how close is the car and `d` coordinate to determine whether is the car in our current lane.
+- The `s` distance of other cars that we use is a projected distance through time. We can do this by multiplying the distance with the current car speed and projecting it according to the amount of waypoints left that our current car has not gone through. By doing so, the distance estimated will be more safe.
+- Check all vehicles and filter out on whether are there cars preventing us from changing lanes
 
-## Project Instructions and Rubric
+## Path planning (Vital part of the codes)
 
-Note: regardless of the changes you make, your project must be buildable using
-cmake and make!
+1: Determine whether are we too close (note: lane_clearing flags are defaulted to `true`)
+
+```
+// do a trajectory projection in terms of s (frenet):
+
+check_car_s += (double)prev_size * 0.02 * check_speed;
+double difference_s = check_car_s - car_s;
+
+// Logic 1: Detecting Car in front of our car. Same lane and it is in front 
+bool s_close = difference_s > 0 && difference_s < 30.0 ; // Is the car close and in front?
+
+if ( s_close && get_current_lane(d) == lane) { // Is the close car in the same lane as us?
+
+too_close = true;  // we are close to the car in front of us
+
+frontcar_speed = check_speed; //speed of the car in front
+
+if(difference_s <= 3.0)  sharp_brake = true; // need to brake more if we are too close (car suddenly coming into our lane)
+
+// Put a false flag to clearing flag for the lane that we are in (lane clear flag is used for switching lane so it does not make sense to switch to the lane 
+// we are already in
+
+if (lane == 0) left_clear = false;
+if (lane == 1) middle_clear = false;
+if (lane == 2) right_clear = false;
+                                   
+} 
+```
+
+2: If we are too close, are other lanes clear for us to switch lanes?
+
+```
+double to_clear_dist = 15.0; //distance that we happy to declare the lane as clear
+bool lane_not_clear = fabs(difference_s) < to_clear_dist ;
+
+if(lane_not_clear) {  // Within the scanning range, check for cars, if there is car in the lane then set clear flag to false
+
+// Put a false flag to lanes where there are cars preventing us from switching lanes:
+// S coordinate, Left: 0 , Middle: 1  , Right: 2
+
+       if (get_current_lane(d) == 1 )  middle_clear = false;
+
+       if (get_current_lane(d) == 0  ) left_clear = false;
+
+       if (get_current_lane(d) == 2  ) right_clear = false;
+                            
+}
+
+```
+
+3: With our flags set, lanes will be switched accordingly. *NOTE*: We won't go across two lanes at once:
+
+```
+ if(too_close){
+                          
+
+    if (right_clear && lane != 0)  lane = 2;  // can only go right if you are in the middle	(prevent switching two lanes at once)
+    if (left_clear && lane != 2) lane = 0;  // can only go left if you are in the middle  (prevent switching two lanes at once)					
+    if (middle_clear)  lane = 1;  
+    
+ }
+```
 
 
-## Call for IDE Profiles Pull Requests
 
-Help your fellow students!
 
-We decided to create Makefiles with cmake to keep this project as platform
-agnostic as possible. Similarly, we omitted IDE profiles in order to ensure
-that students don't feel pressured to use one IDE or another.
 
-However! I'd love to help people get up and running with their IDEs of choice.
-If you've created a profile for an IDE that you think other students would
-appreciate, we'd love to have you add the requisite profile files and
-instructions to ide_profiles/. For example if you wanted to add a VS Code
-profile, you'd add:
+## Try it for yourself:
 
-* /ide_profiles/vscode/.vscode
-* /ide_profiles/vscode/README.md
-
-The README should explain what the profile does, how to take advantage of it,
-and how to install it.
-
-Frankly, I've never been involved in a project with multiple IDE profiles
-before. I believe the best way to handle this would be to keep them out of the
-repo root to avoid clutter. My expectation is that most profiles will include
-instructions to copy files to a new location to get picked up by the IDE, but
-that's just a guess.
-
-One last note here: regardless of the IDE used, every submitted project must
-still be compilable with cmake and make./
-
-## How to write a README
-A well written README file can enhance your project and portfolio.  Develop your abilities to create professional README files by completing [this free course](https://www.udacity.com/course/writing-readmes--ud777).
-
+Go to the main repo from Udacity at [*HERE*](https://github.com/udacity/CarND-Path-Planning-Project). All of the set up information is provided for you. Message me over at [LinkedIn](https://www.linkedin.com/in/timothylimyonglee/) if you want to discuss more about the project.
