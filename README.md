@@ -51,12 +51,84 @@ the path has processed since last time.
 
 The vital information regarding other cars is the position of the cars in terms of the frenet coordinates. The car's s position tells us how close is the car to us along the lanes, the car's d position tells us which lane is the car in.
 
-The trajectory of the car was planned and coded using a finite state machine with the logic as follows:
+The logic for path planning is simple:
 
-1.
-2.
-3.
-4.
+1. Try to retain a speed close to sub 50 Mph at all times
+2. Slow down and prevent collision when a car is too close.
+3. When a car is too close, check whether the lane/lanes to the side of the current car lane is clear to switch lane
+4. If clear to switch lane, switch lanes.
+
+Important ideas to keep in mind:
+
+- When increasing/decreasing speed, speed has to be changed slowily to prevent jerk.
+- We can use the `s` coordinate to determine how close is the car and `d` coordinate to determine whether is the car in our current lane.
+- The `s` distance of other cars that we use is a projected distance through time. We can do this by multiplying the distance with the current car speed and projecting it according to the amount of waypoints left that our current car has not gone through. By doing so, the distance estimated will be more safe.
+- Check all vehicles and filter out on whether are there cars preventing us from changing lanes
+
+## Path planning (Vital part of the codes)
+
+1: Determine whether are we too close (note: lane_clearing flags are defaulted to `true`)
+
+```
+// do a trajectory projection in terms of s (frenet):
+
+check_car_s += (double)prev_size * 0.02 * check_speed;
+double difference_s = check_car_s - car_s;
+
+// Logic 1: Detecting Car in front of our car. Same lane and it is in front 
+bool s_close = difference_s > 0 && difference_s < 30.0 ; // Is the car close and in front?
+
+if ( s_close && get_current_lane(d) == lane) { // Is the close car in the same lane as us?
+
+too_close = true;  // we are close to the car in front of us
+
+frontcar_speed = check_speed; //speed of the car in front
+
+if(difference_s <= 3.0)  sharp_brake = true; // need to brake more if we are too close (car suddenly coming into our lane)
+
+// Put a false flag to clearing flag for the lane that we are in (lane clear flag is used for switching lane so it does not make sense to switch to the lane 
+// we are already in
+
+if (lane == 0) left_clear = false;
+if (lane == 1) middle_clear = false;
+if (lane == 2) right_clear = false;
+                                   
+} 
+```
+
+2: If we are too close, are other lanes clear for us to switch lanes?
+
+```
+double to_clear_dist = 15.0; //distance that we happy to declare the lane as clear
+bool lane_not_clear = fabs(difference_s) < to_clear_dist ;
+
+if(lane_not_clear) {  // Within the scanning range, check for cars, if there is car in the lane then set clear flag to false
+
+// Put a false flag to lanes where there are cars preventing us from switching lanes:
+// S coordinate, Left: 0 , Middle: 1  , Right: 2
+
+       if (get_current_lane(d) == 1 )  middle_clear = false;
+
+       if (get_current_lane(d) == 0  ) left_clear = false;
+
+       if (get_current_lane(d) == 2  ) right_clear = false;
+                            
+}
+
+```
+
+3: With our flags set, lanes will be switched accordingly. *NOTE*: We won't go across two lanes at once:
+
+```
+ if(too_close){
+                          
+
+    if (right_clear && lane != 0)  lane = 2;  // can only go right if you are in the middle	(prevent switching two lanes at once)
+    if (left_clear && lane != 2) lane = 0;  // can only go left if you are in the middle  (prevent switching two lanes at once)					
+    if (middle_clear)  lane = 1;  
+    
+ }
+```
 
 
 
