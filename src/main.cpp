@@ -142,6 +142,7 @@ int main() {
 
                                  // Logic 1: Detecting Car in same lane and its in front (Do not collide):*********
                             if (difference_s > 0 && get_current_lane(d) == lane) {
+
                                     // Car in the same lane is too close
                                     if (difference_s < 30.0) {
                                         // dangerous (near the car in front of you)
@@ -152,7 +153,26 @@ int main() {
                                         if(difference_s <=5.0){ // need to brake more
                                           sharp_brake  = true;
                                         }
+
+                                        // Put a false flag for the lane_clear for the lane that we are in (lane clear flag is used for switching lane)
+
+                                        if (lane == 0) {
+                                            left_clear = false;
+                                        }
+                                        else if (lane == 1) {
+                                            middle_clear = false;
+
+                                        }
+                                        else if (lane == 2) {
+                                            right_clear = false;
+                                        }
+                                        
+
+
                                     }
+
+
+
                             } // Logic 1 ends ************************************************
 
                                            
@@ -163,27 +183,26 @@ int main() {
                           bool lane_not_clear = fabs(difference_s) <= to_clear_dist ;
                           // Within the scanning range, check for cars, if there is car in the lane then set clear flag to false
                           
-                          // I think the problem is because when too close is called, sometimes it is within 5 then it is lane cleared when it is not
                           
                           
-                          if(lane_not_clear){
+                          if(lane_not_clear){ //problem: when lane_not_clear is not called then the too close front car lane won't be called!
                               
                             // note that we have ensure that we put a false flag for the lane of the front car.
                             
-                              if (get_current_lane(d) == 1  || frontcar_lane == 1) {
+                              if (get_current_lane(d) == 1 ) {
 
                                 middle_clear = false;
                                 //cout << "Middle not clear, d value:" << d << endl;
 
                               }
 
-                              if (get_current_lane(d) == 0  || frontcar_lane == 0) { // if we are at the right lane, even if it is clear, do not set clear. (go lane by lane)
+                              if (get_current_lane(d) == 0  ) { // if we are at the right lane, even if it is clear, do not set clear. (go lane by lane)
 
                                 left_clear = false;
                                 //cout << "Left not clear,d value:" << d << endl;
 
                               }
-                              if (get_current_lane(d) == 2   || frontcar_lane == 2) {// if we are at the left lane, even if it is clear, do not set clear. (go lane by lane)
+                              if (get_current_lane(d) == 2  ) {// if we are at the left lane, even if it is clear, do not set clear. (go lane by lane)
 
                                 right_clear = false;
                                 //cout << "Right not clear,d value:" << d << endl;
@@ -192,17 +211,18 @@ int main() {
                               }
                             
                           }
+
+
+
                           // Logic 3 ends ******************
  
                         } // after checking all vehicles on lane (for loop ends)
 
-                        // **************** which lane to go *******************************
+                        // **************** which lane can we go to *******************************
                       
-                      // PROBLEM: when we are at the left lane, no matter how clear is the middle lane, we won't cut to the middle.
                         if(too_close){
                           
-                          //somehow else if logic cannot work here
-                          
+
 
                           if (right_clear && lane != 0) { // can only go right if you are in the middle			     
                             lane = 2;
@@ -221,6 +241,8 @@ int main() {
                                 lane = 1;
                           }
                         //***********************which lane to go ends ************************************
+                        
+
 
                           
                         //****** adapt speed ****
