@@ -143,7 +143,7 @@ int main() {
                                  // Logic 1: Detecting Car in same lane and its in front (Do not collide):*********
                             if (difference_s > 0 && get_current_lane(d) == lane) {
                                     // Car in the same lane is too close
-                                    if (difference_s < 25.0) {
+                                    if (difference_s < 30.0) {
                                         // dangerous (near the car in front of you)
                                         too_close = true;       // car in front is near flag  
 									    frontcar_speed = check_speed;
@@ -159,7 +159,7 @@ int main() {
                           // cout << "Lane that there's car: " << get_current_lane(d) << endl;
                           
                           // Logic 3: check on whether there's car in other lane to change lane:*******
-                          double to_clear_dist = 10.0; 
+                          double to_clear_dist = 15.0; 
                           bool lane_not_clear = fabs(difference_s) <= to_clear_dist ;
                           // Within the scanning range, check for cars, if there is car in the lane then set clear flag to false
                           
@@ -255,7 +255,7 @@ int main() {
 
                         //cout << "Too close:" << too_close << endl;
                         //cout << "Lane:" << lane << endl;
-                        //cout << "Checked_Lane:" << checked_lane << endl;
+                        //cout << "Front car lane:" << frontcar_lane << endl;
                         //cout << "Middle Cleared:" << middle_clear <<endl;
                         //cout << "Left Cleared:" << left_clear <<endl;
                         //cout << "Right Cleared:" << right_clear <<endl;
