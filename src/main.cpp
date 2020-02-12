@@ -140,7 +140,8 @@ int main() {
                             double difference_s = check_car_s - car_s;
 
 
-                                 // Logic 1: Detecting Car in same lane and its in front (Do not collide):*********
+                            // Logic 1: Detecting Car in same lane and its in front (Do not collide):*********
+
                             if (difference_s > 0 && get_current_lane(d) == lane) {
 
                                     // Car in the same lane is too close
@@ -150,11 +151,11 @@ int main() {
 									    frontcar_speed = check_speed;
                                         frontcar_lane = get_current_lane(d);
                                       
-                                        if(difference_s <=5.0){ // need to brake more
+                                        if(difference_s <= 3.0){ // need to brake more
                                           sharp_brake  = true;
                                         }
 
-                                        // Put a false flag for the lane_clear for the lane that we are in (lane clear flag is used for switching lane)
+                                        // Put a false flag to clearing flag for the lane that we are in (lane clear flag is used for switching lane).
 
                                         if (lane == 0) {
                                             left_clear = false;
@@ -171,104 +172,74 @@ int main() {
 
                                     }
 
-
-
                             } // Logic 1 ends ************************************************
-
-                                           
-                          // cout << "Lane that there's car: " << get_current_lane(d) << endl;
+                     
                           
-                          // Logic 3: check on whether there's car in other lane to change lane:*******
+                          // Logic 2: Check on whether there's car in other lane to change lane:*******
+
                           double to_clear_dist = 15.0; 
                           bool lane_not_clear = fabs(difference_s) <= to_clear_dist ;
-                          // Within the scanning range, check for cars, if there is car in the lane then set clear flag to false
-                          
-                          
-                          
-                          if(lane_not_clear){ //problem: when lane_not_clear is not called then the too close front car lane won't be called!
-                              
-                            // note that we have ensure that we put a false flag for the lane of the front car.
-                            
-                              if (get_current_lane(d) == 1 ) {
 
-                                middle_clear = false;
-                                //cout << "Middle not clear, d value:" << d << endl;
+                          if(lane_not_clear) {  // Within the scanning range, check for cars, if there is car in the lane then set clear flag to false
 
-                              }
+                              // Put a false flag to lanes where there are cars preventing us from switching lanes:
+                              // S coordinate, Left: 0 , Middle: 1  , Right: 2
 
-                              if (get_current_lane(d) == 0  ) { // if we are at the right lane, even if it is clear, do not set clear. (go lane by lane)
+                              if (get_current_lane(d) == 1 )  middle_clear = false;
 
-                                left_clear = false;
-                                //cout << "Left not clear,d value:" << d << endl;
+                              if (get_current_lane(d) == 0  ) left_clear = false;
 
-                              }
-                              if (get_current_lane(d) == 2  ) {// if we are at the left lane, even if it is clear, do not set clear. (go lane by lane)
+                              if (get_current_lane(d) == 2  ) right_clear = false;
 
-                                right_clear = false;
-                                //cout << "Right not clear,d value:" << d << endl;
-
-
-                              }
                             
                           }
 
 
 
-                          // Logic 3 ends ******************
+                         // Logic 2 ends ******************
  
-                        } // after checking all vehicles on lane (for loop ends)
+                        } // Checked all vehicles on highway (for loop ends)
 
                         // **************** which lane can we go to *******************************
-                      
+                        // *We will only execute this logic check when we are to too close to the car in front of us 
+                        // No point in changing lanes unless it is beneficial
+
+
+                        // Start up speed (lessen jerk) and also it will increase speed back once we are not close to the car in front
+                        if (ref_vel <= max_vel && !too_close) {
+                            // this statement also ensures that speed will always be around 49.5mph
+                            ref_vel += .224;
+                        }
+
+
                         if(too_close){
                           
 
+                            if (right_clear && lane != 0)  lane = 2;  // can only go right if you are in the middle	(prevent switching two lanes at once)
 
-                          if (right_clear && lane != 0) { // can only go right if you are in the middle			     
-                            lane = 2;
-                  
-                           
-                          }
+                            if (left_clear && lane != 2) lane = 0;  // can only go left if you are in the middle  (prevent switching two lanes at once)					
 
-                          if (left_clear && lane != 2) {// can only go left if you are in the middle					
-                           
-                           lane = 0 ;
-                         
+                            if (middle_clear)  lane = 1;  
 
-                          }
-                          
-                          if (middle_clear && lane != 1) { // put middle as last if statements to prevent double lane change
-                                lane = 1;
-                          }
                         //***********************which lane to go ends ************************************
-                        
 
-
-                          
-                        //****** adapt speed ****
-                          
-                                    
+                        //****** adapt speed when we are too close a car ****
+     
                           if (ref_vel >= frontcar_speed) { // reduce to speed of the car in front
 
-                                    // assume if difference_s 30, then .224 is a good decrement for velocity
-                                    // so we need to scale it 
-                                    ref_vel -= .224 ; 
+                                    ref_vel -= .224 ; // slow decrement (preventing jerking)
                                         
                           }
                          
-                          if(sharp_brake){
-                          ref_vel -= .112; 
+                          if(sharp_brake) {
+                                ref_vel -= .112; 
                           }
                           
                           
-                        } //end if too close
+                        } //end if too_close condition is executed
                       
 
 
-                        if (ref_vel <= max_vel && !too_close) { //start up speed (lessen jerk) and also it will increase speed back once we are not close to the car in front
-                        // this statement also ensures that speed will always be around 49.5mph
-                            ref_vel += .224;
-                        }
                                      
          
                         
