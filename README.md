@@ -67,11 +67,11 @@ Important ideas to keep in mind:
 - The `s` distance of other cars that we use is a projected distance through time. We can do this by multiplying the distance with the current car speed and projecting it according to the amount of waypoints left that our current car has not gone through. By doing so, the distance estimated will be more safe.
 - Check all vehicles and filter out on whether are there cars preventing us from changing lanes
 
-## Path planning (Vital part of the codes)
+## Path planning (Vital part of the codes, `/src/main.cpp`)
 
 1: Determine whether are we too close (note: lane_clearing flags are defaulted to `true`)
 
-```
+```cpp
 // do a trajectory projection in terms of s (frenet):
 
 check_car_s += (double)prev_size * 0.02 * check_speed;
@@ -96,11 +96,12 @@ if (lane == 1) middle_clear = false;
 if (lane == 2) right_clear = false;
                                    
 } 
+
 ```
 
 2: If we are too close, are other lanes clear for us to switch lanes?
 
-```
+```cpp
 double to_clear_dist = 15.0; //distance that we happy to declare the lane as clear
 bool lane_not_clear = fabs(difference_s) < to_clear_dist ;
 
@@ -121,7 +122,7 @@ if(lane_not_clear) {  // Within the scanning range, check for cars, if there is 
 
 3: With our flags set, lanes will be switched accordingly. *NOTE*: We won't go across two lanes at once:
 
-```
+```cpp
  if(too_close){
                           
 
