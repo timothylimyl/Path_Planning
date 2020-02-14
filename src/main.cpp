@@ -166,16 +166,16 @@ int main() {
                             double to_clear_dist = 15.0; //distance that we happy to declare the lane as clear
                             bool lane_not_clear = fabs(difference_s) < to_clear_dist ;
 
-                            if(lane_not_clear) {  // Within the scanning range, check for cars, if there is car in the lane then set clear flag to false
+                            if (lane_not_clear) {  // Within the scanning range, check for cars, if there is car in the lane then set clear flag to false
 
                               // Put a false flag to lanes where there are cars preventing us from switching lanes:
                               // S coordinate, Left: 0 , Middle: 1  , Right: 2
 
-                              if (get_current_lane(d) == 1 )  middle_clear = false;
+                              if (get_current_lane(d) == 1)  middle_clear = false;
 
-                              if (get_current_lane(d) == 0  ) left_clear = false;
+                              if (get_current_lane(d) == 0)  left_clear = false;
 
-                              if (get_current_lane(d) == 2  ) right_clear = false;
+                              if (get_current_lane(d) == 2)  right_clear = false;
 
                             
                             }
@@ -195,12 +195,12 @@ int main() {
                         // **************** which lane can we go to *******************************
                         // *We will only execute this logic check when we are to too close to the car in front of us 
                         // No point in changing lanes unless it is beneficial
-                        if(too_close){
+                        if (too_close) {
                           
 
                             if (right_clear && lane != 0)  lane = 2;  // can only go right if you are in the middle	(prevent switching two lanes at once)
 
-                            if (left_clear && lane != 2) lane = 0;  // can only go left if you are in the middle  (prevent switching two lanes at once)					
+                            if (left_clear && lane != 2)   lane = 0;  // can only go left if you are in the middle  (prevent switching two lanes at once)					
 
                             if (middle_clear)  lane = 1;  
 
@@ -214,7 +214,7 @@ int main() {
                                         
                             }
                          
-                            if(sharp_brake) { // reduce speed further 
+                            if (sharp_brake) { // reduce speed further 
                                 ref_vel -= .112; 
                             }
 
