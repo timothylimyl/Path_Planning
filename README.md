@@ -122,7 +122,7 @@ if(lane_not_clear) {  // Within the scanning range, check for cars, if there is 
 
 ```
 
-3: With our flags set, lanes will be switched accordingly. *NOTE*: We won't go across two lanes at once:
+3: With our flags set, lanes will be switched accordingly. *NOTE*: We won't go across two lanes at once.
 
 ```cpp
  if(too_close){
