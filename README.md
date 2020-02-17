@@ -136,7 +136,11 @@ if(lane_not_clear) {  // Within the scanning range, check for cars, if there is 
 ```
 
 
+#### Results to strive for:
 
+![results](success.PNG)
+
+*12102.27 meters in 10 minutes.* You can achieve this as long as the car is smart enough to switch lanes when necessary!
 
 
 ## Try it for yourself:
