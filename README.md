@@ -136,13 +136,13 @@ if(lane_not_clear) {  // Within the scanning range, check for cars, if there is 
 ```
 
 
-#### Results to strive for:
+## Results to strive for:
 
 ![results](success.PNG)
 
 **12102.27 meters in 10 minutes.** You can achieve this as long as the car is smart enough to switch lanes when necessary!
 
-
+---
 ## Try it for yourself:
 
 Go to the main repo from Udacity at [*HERE*](https://github.com/udacity/CarND-Path-Planning-Project). All of the set up information is provided for you. Message me over at [LinkedIn](https://www.linkedin.com/in/timothylimyonglee/) if you want to discuss more about the project.
